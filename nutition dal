@@ -1,0 +1,28 @@
+public AddNutritionItem(string nutritionItonName, string nutritionItemCategory, int sampleCollectedfrom, out int nutritionItemId)
+
+returnResult=0; 
+
+nutritionitemId =0;
+
+SqlParameter preNutritionitemName= new SqlParameter("@NutritionItemName", nutritionitemname); SqlParameter preNutritionItemCategory= new SqlParameter("@NutritionItemCategory", nutritionltemCategory);
+
+SqlParameter praSampleCollectedFrom= new SqlParameter("@SampleCollected From", sampleCollectedFrom);
+
+SqlParameter prmNutritionItemid =new SqlParameter("@NutritionItemId", SqlibType. Int); praNutritionItemid. Direction =ParameterDirection.Outpu;:
+
+SqlParameter prmReturnkesult =new SqlParameter("@ReturnResult", SqlDbType.Int); prmReturnResult. Direction =ParameterDirection. Output;
+
+try
+
+{
+
+context.Database.ExecuteSqlRaw("Exec @ReturnResult= usp AddNutritionItem NutritionItemName, NutritionItemCatogory, #SampleCollected Fron, @NutritionItemid out", praßeturnResult, prmNutritionItemName, praNutritionItemCategory, primSampleCollectedFrom, preNutritionitemid)
+
+nutritionItemid =Convert.ToInt32(prmNatritionItemId.Value); 
+returnResult =Convert.ToInt32 (prmReturnResult.Value);
+}
+Catch (Exception)
+{
+returnResult=-98;
+}
+return returnResult;}
