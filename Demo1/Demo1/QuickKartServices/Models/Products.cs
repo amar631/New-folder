@@ -14,6 +14,7 @@ namespace QuickKartServices.Models
         [MaxLength(100)]
         public string ProductName { get; set; }
         [Required]
+        [Range(1,24)]
         public byte? CategoryId { get; set; }
         [Required]
         [Range(minimum: 1, maximum: Double.MaxValue)]
