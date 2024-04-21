@@ -1,0 +1,4 @@
+﻿Build started...
+1>------ Build started: Project: QuickKartDataAccessLayer, Configuration: Debug Any CPU ------
+1>QuickKartDataAccessLayer -> D:\ASP.NET Core WebAPI\SuppliedFolder\Day1\Demo1\QuickKartDataAccessLayer\bin\Debug\netcoreapp3.1\QuickKartDataAccessLayer.dll
+========== Build: 1 succeeded, 0 failed, 1 up-to-date, 0 skipped ==========
