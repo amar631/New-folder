@@ -1,0 +1,34 @@
+public int AddAirTrafficDetails (DateTime flightDate, int timeSlot, int airRouteld, string flightId, int airTraffic Controllerld, out string airlines)
+
+string airlines = "";
+
+int returnResult=0;
+
+SqlParameter prmFlight Date=new SqlParameter("@FlightDate", flight Date);
+
+
+
+SqlParameter prmTimeSlot =new SqlParameter("@TimeSlot", timeSlot);
+
+SqlParameter prmAirRouteld =new SqlParameter("@AirRouteld", airRouteId); SqlParameter prmFlightId new SqlParameter("@FlightId", flightId);
+
+SqlParameter prmAirTrafficControllerId =new SqlParameter("@AirTraffic ControllerId", airTrafficControllerId);
+
+SqlParameter prmAirlines =new SqlParameter("@Airlines", SqlDbType. VarChar)7 prmAirlines. Direction Parameter Direction.Output:
+
+SqlParameter prmReturnResult = new SqlParameter("@ReturnResult", SqlDbType.int); prmAirlines. Direction ParameterDirection.Output:
+
+try
+{
+context.Database.ExecuteSqlRaw(" Exec @ReturnResult usp AddAirTrafficDetails @FlightDate, @TimeSlot, @AirRouteld, @FlightId, @AirTrafficControllerId, @Airlines out", prmReturnResult, prmFlight Date, prmTimeSlot, prmAirRouteld, prmFlightId, prmAirTrafficControllerId, prmAirlines):
+}
+returnResult Convert.ToInt32 (prmReturnResult. Value);
+ if (returnResult == 1)
+{
+airlines Convert.ToString(prmAirlines.Value);}
+
+Catch (Exception ex)
+{
+returnResult = -98}
+
+return returnResult;}
