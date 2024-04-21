@@ -1,0 +1,27 @@
+public JsonResult AddNutritionItem (Models. NutritionItem nutritionItem)
+
+{
+
+string message null; result = 0;
+
+try
+
+{
+
+result = repository.AddNutritionItem (nutritionItem.NutritionItem, nutritionItem.NutritionItemCategory, nutritionItem.SampleCollectedFrom, out int nutritionItemId); 
+if (result == 1)
+
+{
+
+message = "Successful addition operation! with NutritionItemId = " + nutritionItemId:
+
+else
+
+{ message = "Unsuccessful addition operation!!";
+
+}
+catch (Exception ex)
+
+{ message = "Some error occurred, please try again!!!";}
+
+return message:}
