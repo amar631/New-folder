@@ -1,6 +1,6 @@
 [HttpPost]
 
-public JoonResult AddAirTrafficDetails (Models.AirTraffic airTraffic)
+public JoonResult AddAirTrafficDetails (Models.AirTraffic airTraffic) {
 
 string message =null;
 
@@ -8,9 +8,9 @@ int result=0;
 
 try
 {
-result repository.AddAirTrafficDetails (airfraffic. Flight Date, airTraffic.Timeslot, airTraffic AirBouteld, airTraffic Flightd airTraffic AirTrafficControllerId, out string airlines);
+result = repository.AddAirTrafficDetails (airfraffic.FlightDate, airTraffic.Timeslot,airTraffic.AirBouteld, airTraffic.Flightd, airTraffic.AirTrafficControllerId, out string airlines);
 
-if (result-1)
+if (result==1)
 {
 message ="Successful addition operation!" + "Airlines="+
 
@@ -26,4 +26,6 @@ Catch (Exception ex)
 
 message ="Some error occured, please try again!!!";
 }
-return Jaon (message) }
+return Json (message);
+
+}
