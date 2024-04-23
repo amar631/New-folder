@@ -1,0 +1,107 @@
+####nutrition
+
+public int AddNutritionComponent(string componentName, string componentCategory, int quantityPresent, out int comp
+
+// To Do: Implement appropriate logic and change the return statement as per your logic
+
+componentId=-1;
+
+int retunResult = 0;
+
+SqlParameter preComponentName = new SqlParameter("@ComponentName", componentName);
+
+SqlParameter preComponentCategory = new SqlParameter("@ComponentCategory", componentCategory);
+
+SqlParameter preQuantityPresent = new SqlParameter("@QuantityPresent", quantity Present);
+
+SqlParameter prmComponentId= new SqlParameter("@ComponentId", System.Data.SqlDbType.Int);
+
+prmComponentId. Direction = System.Data.ParameterDirection.Output;
+
+SqlParameter praReturnResult = new SqlParameter("@ReturnResult", System.Data.SqlDbType.Int);
+
+praReturnResult. Direction = System.Data. ParameterDirection.Output;
+
+try
+
+{
+
+context.Database.ExecuteSqlRaw("EXEC @ReturnResult = usp_AddNutritionComponent @ComponentName, @ComponentCategory, @QuantityPresent, ComponentId OUT",
+ prmReturnResult, prmComponentName, prmComponentCategory, prmQuantityPresent, prmComponentId);
+
+retunResult = Convert.ToInt32(prmReturnResult.Value);
+
+componentId = Convert.ToInt32(prmComponentId.Value);
+
+}
+
+catch (Exception)
+
+{
+
+componentId= 0;
+
+retunResult = -98;
+}
+return retunResult;
+}
+####
+[HttpPost]
+public JsonResult AddNutritionComponent(Models.Component nutritionComponent)
+
+// To Do: Implement appropriate logic and change the return statomont as por your logic
+
+string message ="";
+
+int status;
+
+int component Id;
+
+try
+
+{
+
+status = repository.AddNutritionComponent(nutritionComponent.ComponentName, nutritionComponent.ComponentCategory, nutritionComponent.QualityPresent, out componentId 
+if (status == 1)
+{
+message= $"Nutrition component added successfully! With ComponentId= (componentId)";
+
+else
+
+{
+
+message "Unsuccessful addition of nutrition component!!";
+
+}
+
+catch (Exception)
+
+{
+
+message" Some error occurred, please try again!!!";
+}
+return Json(message);
+
+##
+public class Component
+
+{
+
+/// To Do: Implement appropriate data annotations
+
+ public int ComponentId { get; set; }
+
+[Required] 
+[MinLength(4), MaxLength(50)]
+
+
+
+public string ComponentName { get; set; } 
+[Required]
+
+ public string ComponentCategory { get; set; }
+
+[Required] 
+
+public int QuantityPresent { get; set; }
+
