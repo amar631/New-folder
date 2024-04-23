@@ -48,7 +48,7 @@ public List<int> GetAirRouteId(string source, string destination)
                 routeIdList = context.AirRoute.Select(r =>r.RouteId).Where(s => s.Source == source).Where(t => t.Destination == destination).ToList();
                 //or this
                 routeIdList = context.AirRoute.Select(r => r.RouteId).Where(r => r.Source == source).Where(r => r.Destination == destination).ToList();
-                //any of the above four line will work. I don't remember the exact one
+                //Out of above four line any one line will work. I don't remember the exact one
                 //Only thing to keep note is we are checking two conditions i.e., source and destination using where clause
             }
             catch (Exception)
