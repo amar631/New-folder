@@ -25,3 +25,27 @@ catch (Exception ex)
 { message = "Some error occurred, please try again!!!";}
 
 return message:}
+
+
+
+
+
+
+
+[HttpPut]
+public bool? UpdateNutritionItemCategory()
+{
+ 
+bool result =false ;
+Try
+{
+   result=(bool)repository.UpdateNutritionItemCategory(nutritionItemCategory, newNutritionItemCategory);
+ 
+}
+catch
+{
+resutl= false;
+}
+ 
+return result;
+}
