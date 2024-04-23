@@ -29,3 +29,20 @@ message ="Some error occured, please try again!!!";
 return Json (message);
 
 }
+
+
+
+[HttpGet]
+        public JsonResult FetchAirRouteId(string source, string destination)
+        {
+            List<int> routeId = null;
+            try
+            {
+                routeId = airtraffic.GetAirRouteId(source, destination);
+            }
+            catch (Exception)
+            {
+                routeId = null;
+            }
+            return Json(routeId);
+        }
