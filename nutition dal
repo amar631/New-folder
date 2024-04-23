@@ -26,3 +26,52 @@ Catch (Exception)
 returnResult=-98;
 }
 return returnResult;}
+
+
+
+
+
+
+public bool? UpdateNutritionItemCategory(string nutritionItemCategory, string new nutritionItemCategory)
+
+{
+
+bool result = false;
+
+try 
+
+{
+
+var nutritionItemCategoryList = context.NutritionItem.Find(nutritionItemCategory).ToString;
+ 
+if(nutritionItemCategoryList!= null)
+
+{
+
+nutritionItemCategoryList.nutritionItemCategory = nutritionItemCategory;
+
+context.SaveChanges();
+
+result = true;
+
+}
+
+else
+
+{
+
+result = false;
+
+}
+ 
+}catch(exception ex)
+
+{
+
+result = false;
+
+}
+ 
+resturn result;
+
+}
