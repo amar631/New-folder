@@ -32,3 +32,30 @@ Catch (Exception ex)
 returnResult = -98}
 
 return returnResult;}
+
+
+
+public List<int> GetAirRouteId(string source, string destination)
+        {
+            List<int> routeIdList = null;
+            try
+            {
+                //either this
+                routeIdList = (from r in context.AirRoute where r.Source == source where r.Destination == destination select r.RouteId).ToList();
+                //or this
+                routeIdList = (from r in context.AirRoute where r.Source == source where t.Destination == destination select r.RouteId).ToList();
+                //or this
+                routeIdList = context.AirRoute.Select(r =>r.RouteId).Where(s => s.Source == source).Where(t => t.Destination == destination).ToList();
+                //or this
+                routeIdList = context.AirRoute.Select(r => r.RouteId).Where(r => r.Source == source).Where(r => r.Destination == destination).ToList();
+                //any of the above four line will work. I don't remember the exact one
+                //Only thing to keep note is we are checking two conditions i.e., source and destination using where clause
+            }
+            catch (Exception)
+            {
+                routeIdList = null;
+
+            }
+
+            return routeIdList;
+        }
