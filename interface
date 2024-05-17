@@ -1,0 +1,137 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Exercise13
+{
+    public interface ITaxable
+    {
+        double Price { get; }
+        double CalculateTax();
+        double GetFinalPrice();
+    }
+
+    public class Purchase : ITaxable
+    {
+        public double Price { get; set; }
+        public int Quantity { get; set; }
+        public string PaymentType { get; set; }
+
+        public double CalculateTax()
+        {
+            double taxRate = 0.04; // Default tax rate
+
+            switch (PaymentType)
+            {
+                case "DebitCard":
+                    taxRate = 0.02;
+                    break;
+                case "CreditCard":
+                    taxRate = 0.03;
+                    break;
+                case "Cash":
+                    taxRate = 0.01;
+                    break;
+            }
+
+            return Price * Quantity * taxRate;
+        }
+
+        public double GetFinalPrice()
+        {
+            return Price * Quantity + CalculateTax();
+        }
+    }
+
+    public class InternationalSeller : ITaxable
+    {
+        public int Quantity;
+        public string PaymentType;
+
+        public double Price { get; set; }
+        public double ExportCharge { get; set; }
+        public string[] SellerLocations { get; set; }
+
+        public double CalculateTax()
+        {
+            double taxRate = 0;
+
+            foreach (var location in SellerLocations)
+            {
+                switch (location.ToUpper()) // Case-sensitive comparison
+                {
+                    case "MIDDLE EAST":
+                        taxRate += 0.15;
+                        break;
+                    case "EUROPE":
+                        taxRate += 0.25;
+                        break;
+                    case "CANADA":
+                        taxRate += 0.22;
+                        break;
+                    case "JAPAN":
+                        taxRate += 0.12;
+                        break;
+                }
+            }
+
+            return Price * taxRate;
+        }
+
+        public double GetFinalPrice()
+        {
+            return Price + ExportCharge + CalculateTax();
+        }
+    }
+
+ 
+
+}
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Exercise13;
+namespace TestApplication
+{
+    class Program
+    {
+        
+        static void Main(string[] args)
+        {
+
+            ITaxable purchase1 = new Purchase
+            {
+                Price = 10.00,
+                Quantity = 2,
+                PaymentType = "DebitCard"
+            };
+
+            double totalWithTax1 = purchase1.GetFinalPrice();
+            Console.WriteLine($"Purchase with Debit Card (2 items): ${totalWithTax1:F2}");
+
+            ITaxable seller = new InternationalSeller
+            {
+                Price = 50.00,
+                ExportCharge = 15.00,
+                Quantity = 1,
+                PaymentType = "CreditCard",
+                SellerLocations = new string[] { "Europe", "Canada" }
+            };
+
+            double totalWithTax2 = seller.GetFinalPrice();
+            Console.WriteLine($"International Seller (Europe & Canada): ${totalWithTax2:F2}");
+        }
+    }
+}
+
+
+
+
