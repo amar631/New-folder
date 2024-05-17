@@ -1,0 +1,91 @@
+using System;
+
+public class Employee
+{
+    public decimal BasicSalary { get; } = 10000m;
+
+    public virtual decimal CalculateSalary()
+    {
+        return BasicSalary;
+    }
+}
+
+public class SystemsEngineer : Employee
+{
+    public string Specialization { get; }
+
+    public SystemsEngineer(string specialization)
+    {
+        Specialization = specialization;
+    }
+
+    public override decimal CalculateSalary()
+    {
+        decimal specialistAllowance = (Specialization == "C#" || Specialization == "Java" || Specialization == "SQL") ? 3000m : 0m;
+        return BasicSalary + specialistAllowance;
+    }
+}
+
+public class Manager : Employee
+{
+    public decimal PhoneAllowance { get; } = 4000m;
+
+    public override decimal CalculateSalary()
+    {
+        return BasicSalary + PhoneAllowance;
+    }
+}
+
+public class SeniorProjectManager : Employee
+{
+    public decimal CarAllowance { get; } = 6000m;
+
+    public override decimal CalculateSalary()
+    {
+        return BasicSalary + CarAllowance;
+    }
+}
+
+public class Finance
+{
+    public decimal GetCalculatedSalary(Employee employee)
+    {
+        decimal bonus = 0m;
+
+        if (employee is SystemsEngineer)
+        {
+            bonus = 5000m;
+        }
+        else if (employee is Manager)
+        {
+            bonus = 9000m;
+        }
+        else if (employee is SeniorProjectManager)
+        {
+            bonus = 15000m;
+        }
+
+        return employee.CalculateSalary() + bonus;
+    }
+}
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // Example usage
+        SystemsEngineer systemsEngineer = new SystemsEngineer("C#");
+        Manager manager = new Manager();
+        SeniorProjectManager seniorProjectManager = new SeniorProjectManager();
+
+        Finance finance = new Finance();
+
+        decimal systemsEngineerSalary = finance.GetCalculatedSalary(systemsEngineer);
+        decimal managerSalary = finance.GetCalculatedSalary(manager);
+        decimal seniorProjectManagerSalary = finance.GetCalculatedSalary(seniorProjectManager);
+
+        Console.WriteLine($"Systems Engineer Salary: {systemsEngineerSalary:C}");
+        Console.WriteLine($"Manager Salary: {managerSalary:C}");
+        Console.WriteLine($"Senior Project Manager Salary: {seniorProjectManagerSalary:C}");
+    }
+}
