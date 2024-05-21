@@ -1,0 +1,105 @@
+BankAccount.cs
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Assignment4
+{
+    public delegate void GetBonus(double amount);
+    public class BankAccount
+    {
+        public double Balance { get; set; }
+        double balance;
+
+        public void Credit(double amount)
+        {
+            Balance += amount;
+        }
+        public BankAccount()
+        {
+            double balance;
+        }
+        public bool Debit(double amount)
+        {
+            if (Balance >= amount)
+            {
+                Balance -= amount;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+}
+
+
+Employee.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Assignment4
+{
+
+    public class Employee
+    {
+        BankAccount account;
+        double pensionFundBalance;
+        int numberOfShares;
+        public BankAccount Account { get; set; }
+        public double PensionFundBalance { get; set; }
+        public int NumberOfShares { get; set; }
+
+        public void SetBankAccountCredit(double amount)
+        {
+            Account.Credit(amount);
+        }
+
+        public void SetPensionFundCredit(double amount)
+        {
+            PensionFundBalance += amount;
+        }
+
+        public void SetNumberOfShares(double amount)
+        {
+            NumberOfShares += (int)(amount / 100); // Cast to int for whole shares
+        }
+
+        public void GiveBonus(int bonusOption, double amount)
+        {
+            GetBonus bonusMethod; // Declare delegate variable
+
+            switch (bonusOption)
+            {
+                case 1:
+                    bonusMethod = SetBankAccountCredit; // Assign method reference
+                    break;
+                case 2:
+                    bonusMethod = SetPensionFundCredit; // Assign method reference
+                    break;
+                case 3:
+                    bonusMethod = SetNumberOfShares; // Assign method reference
+                    break;
+                default:
+                    bonusMethod = SetBankAccountCredit; // Assign method reference (fallback)
+                    break;
+            }
+
+            bonusMethod(amount); // Invoke the delegate with the chosen method
+        }
+    }
+}
+
+
+
+
+
