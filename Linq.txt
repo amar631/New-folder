@@ -1,0 +1,35 @@
+public class PurchaseDetails
+{
+    public string PurchaseId { get; set; }
+    public int ProductId { get; set; }
+    public int CustomerId { get; set; }
+    public int QuantityPurchased { get; set; }
+    public DateTime DateOfPurchase { get; set; }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        List<PurchaseDetails> purchaseDetails = new List<PurchaseDetails>()
+        {
+            new PurchaseDetails { PurchaseId = "P1001", ProductId = 1003, CustomerId = 2, QuantityPurchased = 2, DateOfPurchase = new DateTime(2016, 03, 10) },
+            new PurchaseDetails { PurchaseId = "P1002", ProductId = 1002, CustomerId = 1, QuantityPurchased = 1, DateOfPurchase = new DateTime(2016, 03, 16) },
+            new PurchaseDetails { PurchaseId = "P1003", ProductId = 1004, CustomerId = 2, QuantityPurchased = 1, DateOfPurchase = new DateTime(2016, 03, 20) },
+            new PurchaseDetails { PurchaseId = "P1004", ProductId = 1002, CustomerId = 4, QuantityPurchased = 2, DateOfPurchase = new DateTime(2016, 03, 22) },
+            new PurchaseDetails { PurchaseId = "P1005", ProductId = 1001, CustomerId = 3, QuantityPurchased = 4, DateOfPurchase = new DateTime(2016, 03, 26) },
+            new PurchaseDetails { PurchaseId = "P1006", ProductId = 1001, CustomerId = 1, QuantityPurchased = 3, DateOfPurchase = new DateTime(2016, 04, 11) },
+            
+        };
+
+        var allCustomerIds = purchaseDetails.Select(p => p.CustomerId).Distinct();
+        Console.WriteLine("All Customer IDs:");
+        foreach (var id in allCustomerIds)
+        {
+            Console.WriteLine(id);
+        }
+
+
+        Console.WriteLine("\nPress any key to exit...");
+    }
+}
