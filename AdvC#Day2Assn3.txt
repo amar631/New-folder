@@ -1,0 +1,95 @@
+\\ad.infosys.com\storage
+
+
+public class Claim
+{
+    public int ClaimId { get; set; }
+    public int InsuranceId { get; set; }
+    public int NoOfProofs { get; set; }
+    public string CommentUW { get; set; }
+    public string CommentBM { get; set; }
+
+    public Claim(int claimId, int insuranceId, int noOfProofs)
+    {
+        ClaimId = claimId;
+        InsuranceId = insuranceId;
+        NoOfProofs = noOfProofs;
+        CommentUW = "";
+        CommentBM = "";
+    }
+
+    public void ApproveClaimUW(ref Claim claim)
+    {
+        claim.CommentUW = claim.NoOfProofs >= 3 ? "Approved" : "Rejected";
+    }
+
+    public void ApproveClaimBM(ref Claim claim)
+    {
+        if (claim.CommentUW == "Approved")
+        {
+            claim.CommentBM = "Approved";
+        }
+        else if (claim.CommentUW == "Rejected")
+        {
+            claim.CommentBM = "Rejected";
+        }
+        else
+        {
+            claim.CommentBM = "NA";
+        }
+    }
+}
+
+public delegate void ApproveClaimDelegate(ref Claim claim);
+
+public class Assistant
+{
+    public void ApproveClaim(string role, ref Claim claim)
+    {
+        ApproveClaimDelegate delegateMethod = null;
+
+        switch (role)
+        {
+            case "UnderWriter":
+                delegateMethod = claim.ApproveClaimUW;
+                break;
+            case "BankManager":
+                delegateMethod = claim.ApproveClaimBM;
+                break;
+            case "InsuranceManager":
+                delegateMethod = delegate (ref Claim c)
+                {
+                    claim.ApproveClaimUW(ref c);
+                    claim.ApproveClaimBM(ref c);
+                };
+                break;
+            default:
+                Console.WriteLine("Invalid Role. No action taken.");
+                break;
+        }
+
+        if (delegateMethod != null)
+        {
+            delegateMethod(ref claim);
+        }
+    }
+}
+
+public static void Main(string[] args)
+{
+    Claim claim1 = new Claim(1, 2, 3);
+    Assistant assObj1 = new Assistant();
+    assObj1.ApproveClaim("InsuranceManager", ref claim1);
+    Console.WriteLine("Claim Id:" + claim1.ClaimId);
+    Console.WriteLine("Status by Under Writer:" + claim1.CommentUW);
+    Console.WriteLine("Status by Bank Manager:" + claim1.CommentBM);
+
+    Claim claim2 = new Claim(2, 2, 4);
+    Assistant assObj2 = new Assistant();
+    assObj2.ApproveClaim("InsuranceManager", ref claim2);
+    Console.WriteLine("Claim Id:" + claim2.ClaimId);
+    Console.WriteLine("Status by Under Writer:" + claim2.CommentUW);
+    Console.WriteLine("Status by Bank Manager:" + claim2.CommentBM);
+
+    Console.ReadLine();
+}
