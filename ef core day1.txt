@@ -1,0 +1,198 @@
+Create Procedure usp_AddProducts
+(
+@ProductId char(4),
+@ProductName varchar(20),
+@CategoryId tinyint,
+@Price Numeric,
+@QuantityAvailable numeric
+
+--select * from Categories
+)
+as
+Begin
+Begin try
+begin
+if substring(@ProductId,1,1) != 'P' and len(@ProductId) !=4
+begin
+return -2
+end
+else if not exists (select CategoryId
+from Categories
+where CategoryId= @CategoryId)
+begin
+return -5
+end
+else if @Price <= 0
+begin
+return -6
+end
+else if @QuantityAvailable <= 0
+begin
+return -7
+end
+
+else if @ProductId =null
+begin
+return -1
+end
+
+else if @CategoryId = null
+begin
+return -4
+end
+else if @ProductName =null
+begin
+return -3
+end
+else
+begin tran
+Insert into Products(ProductId, ProductName,
+CategoryId, Price, QuantityAvailable)
+values(@ProductId, @ProductName,
+@CategoryId, @Price, @QuantityAvailable)
+commit
+return 1
+
+end
+
+END TRY
+
+BEGIN CATCH
+rollback
+return -99
+END CATCH
+end
+
+--declare @ReturnValue Int
+--exec @ReturnValue= usp_AddProduct null , 'One Plus Smartphone' , 1, 50000, 10
+--select @ReturnValue as result
+
+
+--select * from Products where ProductId= 'p801'
+
+declare @ReturnValue Int
+exec @ReturnValue= usp_AddProducts 'P194' , 'On  Smartphone' , 3, 50000, 5
+select @ReturnValue as Result
+--select * from Products where ProductId = 'P158'
+select * from Products
+
+
+using System;
+using Infosys.DBFirstCore.DataAccessLayer;
+using Infosys.DBFirstCore.DataAccessLayer.Models;
+namespace Infosys.DBFirstCore.ConsoleApp
+{
+    public class Program
+    {
+        static QuickKartDBContext context;
+        static QuickKartRepository repository;
+
+        static Program()
+        {
+            context = new QuickKartDBContext();
+            repository = new QuickKartRepository(context);
+        }
+        static void Main(string[] args)
+        {
+
+            //List<User> users = repository.GetAllUsers();
+            //if (users.Any())
+            //{
+            //    Console.WriteLine("User Details:");
+            //    foreach (var user in users)
+            //    {
+            //        Console.WriteLine($"\tEmail: {user.EmailId}");
+            //        Console.WriteLine($"\tRole: {user.RoleId}"); // Assuming RoleId maps to a role name
+            //        Console.WriteLine($"\tGender: {user.Gender}");
+            //        Console.WriteLine($"\tDate of Birth: {user.DateOfBirth:yyyy-MM-dd}"); // Format date for display
+            //        Console.WriteLine($"\tAddress: {user.Address}");
+            //        Console.WriteLine("--------------------");
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine("No user details found.");
+            //}
+
+           
+
+            // Sample email and new password (replace with user input)
+            string emailId = "Albert@gmail.com";
+            string newPassword = "newPassword123";
+
+            // Call the UpdateUserPassword method
+            bool updateSuccess = repository.UpdateUserPassword(emailId, newPassword);
+
+            if (updateSuccess)
+            {
+                Console.WriteLine("Password updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to update password. User not found or other error.");
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+using Infosys.DBFirstCore.DataAccessLayer.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Infosys.DBFirstCore.DataAccessLayer
+{
+    public class QuickKartRepository
+    {
+        QuickKartDBContext context;
+        public QuickKartRepository(QuickKartDBContext context)
+        {
+            this.context = context;
+        }
+        public List<User> GetAllUsers()
+        {
+            return context.Users.ToList();
+
+        }
+
+        public bool UpdateUserPassword(string emailId, string newUserPassword)
+        {
+            // Fetch the user by email
+            var user = context.Users.FirstOrDefault(u => u.EmailId == emailId);
+
+            if (user != null)
+            {
+                // Update password (assuming there's a property for HashedPassword)
+                user.UserPassword = newUserPassword;  // Hash the new password before saving
+
+                // Update the user in the context
+                context.Update(user);
+
+                // Save changes to the database
+                return context.SaveChanges() > 0;  // Check if any rows were affected (success)
+            }
+            else
+            {
+                return false;  // User not found
+            }
+        }
+
+        // Implement a method to hash the password (replace with your hashing logic)
+
+    }
+
+}
+
+
+
+
