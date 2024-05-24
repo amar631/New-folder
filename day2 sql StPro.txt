@@ -1,0 +1,57 @@
+string emailId = "Mathew_Edmar@infosys.com";
+string productId = "P134";
+int quantityPurchased = 1;
+long purchaseId;
+
+// Test InsertPurchaseDetails
+int insertResult = repository.InsertPurchaseDetails(emailId, productId, quantityPurchased, out purchaseId);
+if (insertResult == -99)
+{
+    Console.WriteLine("Error inserting purchase details (exception)");
+}
+else if (insertResult == -1)
+{
+    Console.WriteLine("Failed to insert purchase details (refer to stored procedure logic)");
+}
+else
+{
+    Console.WriteLine($"Purchase details inserted successfully! Purchase ID: {purchaseId}");
+}
+
+
+
+
+
+
+
+public  int InsertPurchaseDetails(string emailId, string productId, int quantityPurchased, out long purchaseId)
+{
+    purchaseId = 0;
+    int noOfRowsAffected = 0;
+    int returnResult = 0;
+    SqlParameter prmEmailId = new SqlParameter("@EmailId", emailId);
+    SqlParameter prmProductId = new SqlParameter("@ProductId", productId);
+    SqlParameter prmQuantityPurchased = new SqlParameter("@QuantityPurchased", quantityPurchased);
+    SqlParameter prmPurchaseId = new SqlParameter("@PurchaseId", System.Data.SqlDbType.Int);
+    prmPurchaseId.Direction = System.Data.ParameterDirection.Output;
+    SqlParameter prmReturnResult = new SqlParameter("@ReturnResult", System.Data.SqlDbType.Int);
+    prmReturnResult.Direction = System.Data.ParameterDirection.Output;
+    try
+    {
+        noOfRowsAffected = context.Database.ExecuteSqlRaw("EXEC @ReturnResult = usp_InsertPurchaseDetails @EmailId,@ProductId,@QuantityPurchased, @PurchaseId OUT",
+                         prmReturnResult, prmEmailId, prmProductId, prmQuantityPurchased, prmPurchaseId);
+        returnResult = Convert.ToInt32(prmReturnResult.Value);
+
+        purchaseId= Convert.ToInt32(prmPurchaseId.Value);
+    }
+    catch (Exception )
+    {
+        purchaseId = 0;
+        noOfRowsAffected = -1;
+        returnResult = -99;
+    }
+    return returnResult;
+
+
+
+}
