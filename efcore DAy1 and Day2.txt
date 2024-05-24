@@ -1,0 +1,225 @@
+using System;
+using Infosys.DBFirstCore.DataAccessLayer;
+using Infosys.DBFirstCore.DataAccessLayer.Models;
+namespace Infosys.DBFirstCore.ConsoleApp
+{
+    public class Program
+    {
+        static QuickKartDBContext context;
+        static QuickKartRepository repository;
+
+        static Program()
+        {
+            context = new QuickKartDBContext();
+            repository = new QuickKartRepository(context);
+        }
+        static void Main(string[] args)
+        {
+            ///////////////////////////////////READ EXERCISE/////////////////////////////////////////////////
+
+            //List<User> users = repository.GetAllUsers();
+            //if (users.Any())
+            //{
+            //    Console.WriteLine("User Details:");
+            //    foreach (var user in users)
+            //    {
+            //        Console.WriteLine($"\tEmail: {user.EmailId}");
+            //        Console.WriteLine($"\tRole: {user.RoleId}");
+            //        Console.WriteLine($"\tGender: {user.Gender}");
+            //        Console.WriteLine($"\tDate of Birth: {user.DateOfBirth:yyyy-MM-dd}");
+            //        Console.WriteLine($"\tAddress: {user.Address}");
+            //        Console.WriteLine("--------------------");
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine("No user details found.");
+            //}
+
+
+            ////////////////////////////////////////////////Create Exercise//////////////////////////////////////////
+            ///
+
+            //User userrs = new User();
+            //userrs.EmailId = "aaaa@gmail.com";
+            //userrs.UserPassword = "GN@123";
+            //userrs.RoleId = 1;
+            //userrs.Gender = "F";
+            //userrs.DateOfBirth = Convert.ToDateTime("02-dec-1978");
+            //userrs.Address = "New Avenue,Robster";
+            //bool result = repository.RegisterUser(userrs);
+            //if (result)
+            //{
+            //    Console.WriteLine("user details added successfully!");
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Some error occurred. Try again!!");
+            //}
+
+
+
+
+            ///////////////////////////////////UPDATE EXERCISE/////////////////////////////////////////////////
+
+
+            // Sample email and new password (replace with user input)
+            //string emailId = "Albert@gmail.com";
+            //string newPassword = "ord123";
+
+            //// Call the UpdateUserPassword method
+            //bool updateSuccess = repository.UpdateUserPassword(emailId, newPassword);
+
+            //if (updateSuccess)
+            //{
+            //    Console.WriteLine("Password updated successfully!");
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Failed to update password. User not found or other error.");
+            //}
+
+
+
+            ///////////////////////////////////STORED PROCEDURE EXERCISE/////////////////////////////////////////////////
+
+            string emailId = "Mathew_Edmar@infosys.com";
+            string productId = "P134";
+            int quantityPurchased = 1;
+            long purchaseId;
+
+            // Test InsertPurchaseDetails
+            int insertResult = repository.InsertPurchaseDetails(emailId, productId, quantityPurchased, out purchaseId);
+            if (insertResult == -99)
+            {
+                Console.WriteLine("Error inserting purchase details (exception)");
+            }
+            else if (insertResult == -1)
+            {
+                Console.WriteLine("Failed to insert purchase details (refer to stored procedure logic)");
+            }
+            else
+            {
+                Console.WriteLine($"Purchase details inserted successfully! Purchase ID: {purchaseId}");
+            }
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using Infosys.DBFirstCore.DataAccessLayer.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Infosys.DBFirstCore.DataAccessLayer
+{
+    public class QuickKartRepository
+    {
+        QuickKartDBContext context;
+        public QuickKartRepository(QuickKartDBContext context)
+        {
+            this.context = context;
+        }
+        public List<User> GetAllUsers()
+        {
+            return context.Users.ToList();
+
+        }
+
+        public bool RegisterUser(params User[] users)
+        {
+            bool status = false;
+            try
+            {
+                context.Users.AddRange(users);
+                context.SaveChanges();
+                status = true;
+            }
+            catch (Exception ex)
+            {
+                status = false;
+            }
+            return status;
+        }
+
+
+
+        public bool UpdateUserPassword(string emailId, string newUserPassword)
+        {
+            var user = context.Users.FirstOrDefault(u => u.EmailId == emailId);
+
+            if (user != null)
+            {
+                user.UserPassword = newUserPassword;  
+
+                context.Update(user);
+
+                return context.SaveChanges() > 0;  
+            }
+            else
+            {
+                return false;  // User not found
+            }
+        }
+
+
+        public int InsertPurchaseDetails(string emailId, string productId, int quantityPurchased, out long purchaseId)
+        {
+            purchaseId = 0;
+            int noOfRowsAffected = 0;
+            int returnResult = 0;
+            SqlParameter prmEmailId = new SqlParameter("@EmailId", emailId);
+            SqlParameter prmProductId = new SqlParameter("@ProductId", productId);
+            SqlParameter prmQuantityPurchased = new SqlParameter("@QuantityPurchased", quantityPurchased);
+            SqlParameter prmPurchaseId = new SqlParameter("@PurchaseId", System.Data.SqlDbType.Int);
+            prmPurchaseId.Direction = System.Data.ParameterDirection.Output;
+            SqlParameter prmReturnResult = new SqlParameter("@ReturnResult", System.Data.SqlDbType.Int);
+            prmReturnResult.Direction = System.Data.ParameterDirection.Output;
+            try
+            {
+                noOfRowsAffected = context.Database.ExecuteSqlRaw("EXEC @ReturnResult = usp_InsertPurchaseDetails @EmailId,@ProductId,@QuantityPurchased, @PurchaseId OUT",
+                                 prmReturnResult, prmEmailId, prmProductId, prmQuantityPurchased, prmPurchaseId);
+                returnResult = Convert.ToInt32(prmReturnResult.Value);
+
+                purchaseId = Convert.ToInt32(prmPurchaseId.Value);
+            }
+            catch (Exception)
+            {
+                purchaseId = 0;
+                noOfRowsAffected = -1;
+                returnResult = -99;
+            }
+            return returnResult;
+        }
+
+    }
+
+}
+
+
+
