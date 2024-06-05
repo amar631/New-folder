@@ -1,0 +1,130 @@
+
+        #region GetAllItems //done
+
+        [HttpGet]
+        public JsonResult GetAllItems()
+        {
+            // To-do: Implement necessary code here
+           List<Item> items = new List<Item>();
+            try
+            {
+                items = repository.GetAllItems();
+            }
+            catch (Exception )
+            {
+                items = null;
+            }    
+            return Json(items);
+        }
+        #endregion
+
+        #region GetAllItemsByCategoryName
+
+        [HttpGet]
+        public JsonResult GetAllItemsByCategoryName(string categoryName)
+        {
+            // To-do: Implement necessary code here
+
+            List<ItemDetails> item = new List<ItemDetails>();
+            try
+            {
+                item = repository.GetItemDetails(categoryName);
+            }
+            catch(Exception )
+            {
+                item =  null;
+            }
+            return Json(item);
+        }
+        #endregion
+
+        #region GetItemPrice //done
+        [HttpGet]
+        public JsonResult GetItemPrice(string itemId)
+        {
+            // To-do: Implement necessary code here
+            //Item item = new Item();
+            decimal item;
+            try
+            {
+                item=repository.GetItemPrice(itemId);
+
+            }
+            catch( Exception )
+            {
+                item = 0;
+
+            }
+
+            return Json(item);
+        }
+        #endregion //
+
+        #region PlaceOrder
+        [HttpPost]
+        public JsonResult PlaceOrder(Models.Order order)
+        {
+            // To-do: Implement necessary code here
+            int customerId = order.CustomerId;
+            string itemId = order.ItemId;
+            int quantity = order.Quantity;
+            string deliveryAddress = order.DeliveryAddress;
+            DateTime orderDate = order.OrderDate;
+            decimal totalPrice = order.TotalPrice;
+            int orderId = order.OrderId;
+            int status;
+            string msg="";
+            try
+            {
+                status = repository.PlaceOrder(customerId, itemId, quantity, deliveryAddress, orderDate,out totalPrice,out orderId);
+                if(status == 1) 
+                {
+                    msg = "Order placed successfully. Your OrderId =" + orderId + "Total Price to be paid =" + totalPrice;
+                }
+
+            }
+            catch(Exception )
+            {
+                status = 0;
+                msg = "Unsuccessfull";
+            }
+            return Json(msg);
+        } 
+        #endregion
+
+
+
+
+
+
+
+
+        #region CheckDeliveryStatus
+        [HttpGet]
+         public JsonResult CheckDeliveryStatus(int orderId)
+        {
+            // To-do: Implement necessary code here
+            int status = 0;
+            string msg = "";
+            try
+            {
+                status = repository.CheckDeliveryStatus(orderId);   
+                if(status == 1) 
+                {
+                    msg = "Not Delivered";
+                }
+                else if (status == 0)
+                {
+                    msg = "Delivered";
+
+                }
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.StackTrace);
+                msg = "error";           
+            }
+
+            return Json(msg);
+         }
+        #endregion
