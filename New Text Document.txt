@@ -1,0 +1,512 @@
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using OnlineFoodOrderDALCrossPlatform.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace OnlineFoodOrderDALCrossPlatform
+{
+    public class CustomerRepository
+    {
+        OnlineFoodOrderDBContext context;
+        public CustomerRepository(OnlineFoodOrderDBContext onlineFoodOrderDBContext)
+        {
+            // To-do: Implement necessary code here
+            context = onlineFoodOrderDBContext;
+        }
+
+        #region GetAllItems
+        public List<Item> GetAllItems()
+        {
+            // To-do: Implement necessary code here
+            var itemList = context.Items.ToList();
+            return itemList;
+        }
+        #endregion
+
+        #region GetItemDetails
+        public List<ItemDetails> GetItemDetails(string categoryName)
+        {
+            // To-do: Implement necessary code here
+            List<ItemDetails> itemDetails = null;
+            try
+            {
+                //itemDetails = context.Items.Where(c => c.ItemName == categoryName).ToList();
+                SqlParameter prmCategoryName = new SqlParameter("@CategoryName", categoryName);
+                itemDetails = context.ItemDetails.FromSqlRaw("SELECT * FROM ufn_FetchItemDetails(@CategoryName)",
+                                                              prmCategoryName).ToList();
+            }
+            catch (Exception) 
+            {
+                itemDetails = null;
+            }
+            return itemDetails;
+        }
+        #endregion
+
+        #region GetItemPrice
+        public decimal GetItemPrice(string itemId)
+        {
+            // To-do: Implement necessary code here
+            decimal status;
+            try
+            {
+                status = (from p in context.Items select OnlineFoodOrderDBContext.ufn_FetchItemPrice(itemId)).FirstOrDefault();
+            }
+            catch(Exception) 
+            {
+                status = 0;
+            }
+
+            return status;
+        }
+        #endregion
+
+        #region PlaceOrder
+        public int PlaceOrder(int customerId, string itemId, int quantity, 
+            string deliveryAddress, DateTime orderDate, out decimal totalPrice, 
+            out int orderId)
+        {
+            // To-do: Implement necessary code here
+            orderId = 0;
+            totalPrice = 0;
+            int returnResult = 0;
+            int noOfRowsAffected = 0;
+
+            SqlParameter prmCustomerId = new SqlParameter("@CustomerId", customerId);
+            SqlParameter prmItemId = new SqlParameter("@ItemId", itemId);
+            SqlParameter prmQuantity = new SqlParameter("@Quantity", quantity);
+            SqlParameter prmDeliveryAddress = new SqlParameter("@DeliveryAddress", deliveryAddress);
+            SqlParameter prmOrderDate = new SqlParameter("@OrederDate", orderDate);
+            SqlParameter prmTotalPrice = new SqlParameter("@TotalPrice", System.Data.SqlDbType.Int);
+            prmTotalPrice.Direction = System.Data.ParameterDirection.Output;
+            SqlParameter prmOredrId = new SqlParameter("@OredrId", System.Data.SqlDbType.Int);
+            prmOredrId.Direction = System.Data.ParameterDirection.Output;
+            SqlParameter prmReturnResult = new SqlParameter("@ReturnResult", System.Data.SqlDbType.Int);
+            prmReturnResult.Direction = System.Data.ParameterDirection.Output;
+
+            try
+            {
+                noOfRowsAffected = context.Database
+                         .ExecuteSqlRaw("EXEC @ReturnResult = usp_AddOrderDetails @CustomerId,@ItemId,@Quantity,@DeliveryAddress,@OrederDate, @TotalPrice OUT,@OredrId OUT",
+                                        prmReturnResult, prmCustomerId,prmItemId,prmQuantity, prmDeliveryAddress, prmOrderDate, prmTotalPrice, prmOredrId);
+                returnResult = Convert.ToInt32(prmReturnResult.Value);
+                orderId = Convert.ToInt32(prmOredrId.Value);
+                totalPrice  = Convert.ToInt32(prmTotalPrice.Value); 
+
+
+
+            }
+            catch (Exception)
+            {
+                orderId = 0;
+                totalPrice = 0;
+                noOfRowsAffected = -1;
+                returnResult = -99;
+
+
+            }
+
+            
+            return returnResult;
+        }  
+        #endregion
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using OnlineFoodOrderDALCrossPlatform.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace OnlineFoodOrderDALCrossPlatform
+{
+    public class CommonRepository
+    {
+        OnlineFoodOrderDBContext context;
+        public CommonRepository(OnlineFoodOrderDBContext onlineFoodOrderDBContext)
+        {
+            // To-do: Implement necessary code here
+            context = new OnlineFoodOrderDBContext();
+        }
+
+        #region CheckDeliveryStatus
+        public int CheckDeliveryStatus(int orderId)
+        {
+            // To-do: Implement necessary code here
+            int result;
+            try
+            {
+                result = (from p in context.Orders
+                          select OnlineFoodOrderDBContext.ufn_CheckDeliveryStatus(orderId))
+                          .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                result = 0;
+            }
+            return result;
+        }
+        #endregion
+
+        #region DeleteOrderDetails
+        public bool DeleteOrderDetails(int orderId)
+        {
+            // To-do: Implement necessary code here
+            bool status = false;
+            Order order = new Order();
+            try
+            {
+                order = context.Orders.Find(orderId);
+                context.Orders.Remove(order);
+                context.SaveChanges();
+                status = true;
+
+            }
+            catch (Exception)
+            {
+                status = false;
+            }
+
+            return status;
+        }
+        #endregion
+
+        #region GetAllOrderDetails
+        public List<OrderDetails> GetAllOrderDetails(int orderId)
+        {
+            // To-do: Implement necessary code here
+            List<OrderDetails> orderDetails = null;
+            try
+            {
+                SqlParameter prmOrderId = new SqlParameter("@OrderId", orderId);
+                orderDetails = context.OrderDetails.FromSqlRaw("SELECT * FROM ufn_GetOrderDetails(@OrderId)",
+                                                        prmOrderId).ToList();
+
+            }
+            catch (Exception) 
+            {
+                orderDetails = null; 
+            }
+
+            return orderDetails;
+        }
+        #endregion
+    }
+}
+
+
+
+
+
+
+
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using OnlineFoodOrderDALCrossPlatform.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace OnlineFoodOrderDALCrossPlatform
+{
+        #region Do not modify the signature
+        public class AdminRepository
+        {
+            OnlineFoodOrderDBContext context;
+        public AdminRepository(OnlineFoodOrderDBContext onlineFoodOrderDBContext)
+        {
+            // To-do: Implement necessary code here
+            context = new OnlineFoodOrderDBContext();
+        }
+
+        #endregion
+
+        #region AddItem
+        public bool AddItem(string itemId, string itemName, int categoryId, decimal price)
+        {
+            // To-do: Implement necessary code here
+            bool status = false;
+            Item item = new Item();
+            
+            try
+            {
+                item.ItemId = itemId;
+                item.ItemName = itemName;
+                item.CategoryId = categoryId;
+                item.Price = price;
+                
+                
+                context.Items.Add(item);
+                context.SaveChanges();
+                status = true;
+
+            }
+            catch(Exception)
+            {
+                status = false;
+            }
+            return status;
+        }
+        #endregion   
+
+        #region GetAllCategoryOrderDetails
+        public List<CategoryItemDetails> GetAllCategoryOrderDetails(int categoryId)
+        {
+            // To-do: Implement necessary code here
+            List<CategoryItemDetails> itemDetails = null;
+            try
+            {
+                SqlParameter prmCategoryId = new SqlParameter("@CategoryId", categoryId);
+                itemDetails = context.CategoryItemDetails.FromSqlRaw("SELECT * FROM ufn_GetAllOrderDetails(@CategoryId)",
+                                                              prmCategoryId).ToList();
+            }
+            catch(Exception)
+            {
+                itemDetails = null;
+                throw;
+            }
+            return itemDetails;
+        }
+        #endregion
+
+        #region UpdatePrice
+        public bool UpdatePrice(string itemId, decimal itemPrice)
+        {
+            // To-do: Implement necessary code here
+            bool status = false;
+            try
+            {
+                Item item = context.Items.Find(itemId);
+                item.Price = itemPrice;
+                context.SaveChanges();
+                status = true;
+
+            }
+            catch(Exception ) 
+            {
+                status = false;
+            }
+
+            return status;
+        }
+        #endregion
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+
+namespace OnlineFoodOrderDALCrossPlatform.Models
+{
+    public class ItemDetails
+    {
+        // To-do: Implement appropriate properties
+        [Key]
+        
+        public string ItemId { get; set; } = null!;
+        public string ItemName { get; set; } = null!;
+        public int CategoryId { get; set; }
+
+        public decimal Price { get; set; }
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
+
+namespace OnlineFoodOrderDALCrossPlatform.Models
+{
+    public partial class OnlineFoodOrderDBContext : DbContext
+    {
+        public OnlineFoodOrderDBContext()
+        {
+        }
+
+        public OnlineFoodOrderDBContext(DbContextOptions<OnlineFoodOrderDBContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Category> Categories { get; set; } = null!;
+        public virtual DbSet<Customer> Customers { get; set; } = null!;
+        public virtual DbSet<Item> Items { get; set; } = null!;
+        public virtual DbSet<Order> Orders { get; set; } = null!;
+        public virtual DbSet<ItemDetails> ItemDetails { get; set; } = null!;
+        public virtual DbSet<OrderDetails> OrderDetails { get; set; } = null!;
+        public virtual DbSet<CategoryItemDetails> CategoryItemDetails { get; set; } = null;
+
+
+        [DbFunction("ufn_FetchItemPrice", "dbo")]
+        public static decimal ufn_FetchItemPrice(string itemId)
+        {
+            return 0;
+        }
+
+        [DbFunction("ufn_CheckDeliveryStatus", "dbo")]
+        public static int ufn_CheckDeliveryStatus(int orderId)
+        {
+            return 0;
+        }
+
+
+
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var builder = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json");
+            var config = builder.Build();
+            var connectionString = config.GetConnectionString("DBConnectionString");
+            if (!optionsBuilder.IsConfigured)
+            {
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                // optionsBuilder.UseSqlServer("Data Source =(localdb)\\MSSQLLocalDB;Initial Catalog=OnlineFoodOrderDB;Integrated Security=true");
+                optionsBuilder.UseSqlServer(connectionString);
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.ToTable("Category");
+
+                entity.Property(e => e.CategoryName)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Customer>(entity =>
+            {
+                entity.Property(e => e.Address)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CustomerName)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EmailId)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Item>(entity =>
+            {
+                entity.Property(e => e.ItemId)
+                    .HasMaxLength(3)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
+                entity.Property(e => e.ItemName)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Price).HasColumnType("money");
+
+                entity.HasOne(d => d.Category)
+                    .WithMany(p => p.Items)
+                    .HasForeignKey(d => d.CategoryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_CategoryId");
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.Property(e => e.DeliveryAddress)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DeliveryStatus)
+                    .HasMaxLength(3)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("('NDL')")
+                    .IsFixedLength();
+
+                entity.Property(e => e.ItemId)
+                    .HasMaxLength(3)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
+                entity.Property(e => e.OrderDate)
+                    .HasColumnType("date")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.TotalPrice).HasColumnType("money");
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_CustomerId");
+
+                entity.HasOne(d => d.Item)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.ItemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_ItemId");
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    }
+}
