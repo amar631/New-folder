@@ -1,0 +1,10 @@
+{
+  "orderId": 1,
+  "customerId": 1005,
+  "itemId": "MAR",
+  "quantity": 111,
+  "totalPrice": 11000,
+  "deliveryAddress": "string",
+  "orderDate": "2024-06-05",
+  "deliveryStatus": "DL"
+}
