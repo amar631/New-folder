@@ -1,0 +1,126 @@
+       #region DeleteOrderDetails
+       [HttpDelete]
+       public JsonResult DeleteOrderDetails(int orderId)
+       {
+           // To-do: Implement necessary code here
+           string message = null;
+           try
+           {
+               bool status = repository.DeleteOrderDetails(orderId);
+               if (status)
+               {
+                   message = "Order Cancelled!";
+               }
+           }
+           catch (Exception)
+           {
+               message = "Some error occured";
+           }
+           return Json(message);
+       }
+       #endregion
+
+       #region GetAllOrderDetails
+       [HttpGet]
+       public JsonResult GetAllOrderDetails(int orderId)
+       {
+           // To-do: Implement necessary code here
+
+           List<OrderDetails> listorderdetails = new List<OrderDetails>();
+           try
+           {
+               listorderdetails = repository.GetAllOrderDetails(orderId);
+           }
+           catch (Exception)
+           {
+               listorderdetails = null;
+           }
+           return Json(listorderdetails);
+       }
+       #endregion
+
+
+
+
+
+
+
+
+
+        #region AddItem
+        [HttpPost]
+        public JsonResult AddItem(Models.Item item)
+        {
+            // To-do: Implement necessary code here
+            bool status = false;
+            var message = "";
+            try
+            {
+                string itemid = item.ItemId;
+                string itemname = item.ItemName;
+                int categoryid = item.CategoryId;
+                decimal price = item.Price;
+                status = repository.AddItem(itemid, itemname, categoryid, price);
+                if (status)
+                    message = "Item added successfully!";
+                else
+                    message = "Error!";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                message = "Error!";
+            }
+            return Json(message);
+
+        }
+        #endregion
+
+        #region GetAllCategoryOrderDetails
+        [HttpGet]
+        public JsonResult GetAllCategoryOrderDetails(int categoryId)
+        {
+            
+            List<CategoryItemDetails> orderdetails = null;
+            try
+            {
+                orderdetails = repository.GetAllCategoryOrderDetails(categoryId);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                orderdetails = null;
+            }
+            return Json(orderdetails);
+
+
+
+
+        }
+        #endregion
+
+        #region UpdatePrice
+        [HttpPut]
+        public JsonResult UpdatePrice(string itemId, decimal price)
+        {
+            // To-do: Implement necessary code here
+            var message = "";
+            var status = false;
+            try
+            {
+                status = repository.UpdatePrice(itemId, price);
+                if (status)
+                    message = "Price Updated sucessfully";
+                else
+                    message = "Unsccussful operation";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                message = "Unsuccesful operation";
+            }
+            return Json(message);
+
+        }
+        #endregion
