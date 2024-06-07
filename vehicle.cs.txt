@@ -1,0 +1,244 @@
+bhai sab sahi hai
+
+
+
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VehicleParkingDALCrossPlatform.Models;
+
+namespace VehicleParkingDALCrossPlatform
+{
+    public class VehicleParkingRepositoryEF
+    {
+        #region Do not modify
+
+        VehicleParkingDBContext context;
+
+        #endregion
+
+        #region Do not modify the signature
+
+        public VehicleParkingRepositoryEF(VehicleParkingDBContext vehicleParkingDBContext)
+        {
+            // To-Do: Implement appropriate logic here
+            context = vehicleParkingDBContext;
+        }
+
+        #endregion
+
+        #region BookingSlotForParking - Do not modify the signature
+        public int BookingSlotForParking(string parkingAreaId, byte parkingSlot, string vehicleNo, out int parkingBookingId)
+        {
+            // To-do: Implement appropriate logic and change the return statement as per your logic
+
+             parkingBookingId = 0;
+            int returnResult = 0;
+            int noOfRowsAffected = 0;
+
+
+            SqlParameter prmParkingAreaId = new SqlParameter("@ParkingAreaId",parkingAreaId);
+            SqlParameter prmParkingSlot = new SqlParameter("@ParkingSlot",parkingSlot);
+            SqlParameter prmVehicleNo = new SqlParameter("@VehicleNumber", vehicleNo);
+
+            SqlParameter prmParkingBookingId = new SqlParameter("@ParkingBookingId", parkingBookingId);
+            prmParkingBookingId.Direction=System.Data.ParameterDirection.Output;
+
+            SqlParameter prmReturnResult = new SqlParameter("@ReturnResult",returnResult);
+            prmReturnResult.Direction = System.Data.ParameterDirection.Output;
+
+            try
+            {
+                noOfRowsAffected = context.Database.ExecuteSqlRaw("EXEC @ReturnResult = usp_ParkingSlotBooking @ParkingAreaId,@ParkingSlot,@VehicleNumber,@ParkingBookingId OUT", prmReturnResult,prmParkingAreaId, prmParkingSlot, prmVehicleNo,prmParkingBookingId);
+
+                returnResult = Convert.ToInt32(prmReturnResult.Value);
+                parkingBookingId = Convert.ToInt32(prmParkingBookingId.Value);
+
+            }
+            catch (Exception)
+            {
+
+                noOfRowsAffected = -1;
+                returnResult = -98;
+            }
+            
+            return returnResult;
+        }
+
+        #endregion
+
+        #region UpdateVehicleOwner - Do not modify the signature
+        public bool? UpdateVehicleOwner(string vehicleNumber, string newVehicleOwner)
+        {
+            // To-do: Implement appropriate logic and change the return statement as per your logic
+            bool status = false;
+            try
+            {
+                VehicleDetail vehicle = context.VehicleDetails.Find(vehicleNumber);
+                vehicle.VehicleOwner = newVehicleOwner;
+                context.SaveChanges();
+                status = true;
+
+            }
+            catch (Exception)
+            {
+                status = false;
+            }
+
+            return status;
+        }
+
+        #endregion
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using VehicleParkingDALCrossPlatform;
+using VehicleParkingDALCrossPlatform.Models;
+
+namespace VehicleParkingWebService.Controllers
+{
+	[Route("api/[controller]/[action]")]
+	[ApiController]
+	public class VehicleParkingController : Controller
+	{
+        #region  Do not modify
+
+        VehicleParkingRepositoryEF repository;
+        public VehicleParkingController(VehicleParkingRepositoryEF vehicleParkingRepository)
+        {
+            repository = vehicleParkingRepository;
+        }
+
+        [HttpGet]
+        public string Get()
+        {
+            try
+            {
+                return ("Application hosted successfully!");
+            }
+            catch (Exception)
+            {
+                return ("Application could not be hosted!!");
+            }
+
+        }
+
+        #endregion
+
+        #region  BookingSlotForParking - Do Not Modify Signature
+        [HttpPost]
+        public JsonResult BookingSlotForParking(string parkingAreaId, byte parkingSlot, string vehicleNo)
+        {
+            // To-do: Implement appropriate logic and change the return statement as per your logic
+            String message = null;
+            int result = 0;
+            try
+            {
+                result = repository.BookingSlotForParking(parkingAreaId, parkingSlot, vehicleNo, out int parkingBookingId);
+                if (result == 1)
+                {
+                    message = "Your Parking Slot Booked Successfully. ParkingBookingId = " +parkingBookingId;
+                }
+                else
+                {
+                    message = "Something went wrong, please try again";
+                }
+
+            }
+            catch (Exception)
+            {
+
+                message = "Some error occured";
+            }
+            return Json(message);
+		}
+
+        #endregion
+
+        #region UpdateVehicleOwner - Do not modify signature
+        [HttpPut]
+        public JsonResult UpdateVehicleOwner(Models.VehicleDetail vehicleDetail)
+		{
+            // To-do: Implement appropriate logic and change the return statement as per your logic
+            bool status = false;
+            VehicleDetail vehicle=new VehicleDetail();
+            vehicle.VehicleOwner=vehicleDetail.VehicleOwner;
+            vehicle.VehicleNumber=vehicleDetail.VehicleNumber;
+            try
+            {
+                status = (bool)repository.UpdateVehicleOwner(vehicle.VehicleNumber, vehicle.VehicleOwner);
+                
+            }
+            catch (Exception ex)
+            {
+                status = false;
+            }
+            return Json(status);
+        }
+
+        #endregion
+      
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using System.ComponentModel.DataAnnotations;
+
+namespace VehicleParkingWebService.Models
+{
+    public class VehicleDetail
+    {
+        // To-do: Implement appropriate properties and data annotations
+        [Required]
+
+        [MinLength(10)]
+        [MaxLength(10)]
+        public string VehicleNumber { get; set; }
+        //[Required]
+        //public string VehicleType { get; set; }
+        [Required]
+        public string VehicleOwner { get; set; }
+    }
+}
+
